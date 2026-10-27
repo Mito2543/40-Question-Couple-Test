@@ -1,0 +1,424 @@
+```html
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบความสัมพันธ์ 40 ข้อ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(251, 113, 133, 0.3);
+        }
+
+        /* Floating Hearts Background */
+        .heart {
+            position: absolute;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            animation: floatUp 8s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf2f8; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f472b6; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="relative flex items-center justify-center py-10 px-4">
+
+    <!-- Decorative Floating Hearts -->
+    <div id="heart-container" class="fixed inset-0 overflow-hidden pointer-events-none"></div>
+
+    <!-- Main Card Container -->
+    <div class="relative z-10 w-full max-w-3xl bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden slide-up border border-pink-100">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-pink-400 to-rose-400 p-6 text-center text-white">
+            <h1 class="text-2xl md:text-3xl font-semibold"><i class="fa-solid fa-heart-pulse mr-2"></i> Relationship Test</h1>
+            <p class="text-sm md:text-base mt-2 opacity-90">ค้นหาว่าคุณคือคนรักสไตล์ไหนจากคำถาม 40 ข้อ</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="p-8 md:p-12 text-center">
+            <div class="w-32 h-32 mx-auto bg-pink-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <i class="fa-solid fa-comments text-5xl text-pink-500 animate-bounce"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">พร้อมที่จะรู้จักตัวเอง (และแฟน) ให้มากขึ้นหรือยัง?</h2>
+            <p class="text-gray-600 mb-8 max-w-lg mx-auto">แบบทดสอบนี้มีทั้งหมด 40 ข้อ กรุณาเลือกข้อที่ตรงกับความคิดและความรู้สึกของคุณมากที่สุด ไม่ต้องคิดนาน ใช้สัญชาตญาณแรกของคุณตอบเลย!</p>
+            <button onclick="startQuiz()" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3 px-10 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all text-lg">
+                เริ่มทำแบบทดสอบ <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden p-6 md:p-10">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between text-sm text-gray-500 font-medium mb-2">
+                    <span>ความคืบหน้า</span>
+                    <span id="progress-text">1 / 40</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progress-bar" class="bg-gradient-to-r from-pink-400 to-rose-400 h-3 rounded-full transition-all duration-300" style="width: 2.5%"></div>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="min-h-[250px] flex flex-col justify-center">
+                <h3 id="question-text" class="text-xl md:text-2xl font-medium text-gray-800 mb-6 text-center leading-relaxed">
+                    คำถามจะแสดงที่นี่
+                </h3>
+
+                <!-- Options -->
+                <div id="options-container" class="space-y-4">
+                    <!-- Option buttons generated by JS -->
+                </div>
+                
+                <!-- Back Button Navigation -->
+                <div class="mt-6 flex justify-start">
+                    <button id="back-btn" onclick="prevQuestion()" class="hidden text-pink-500 font-medium hover:text-pink-700 transition-colors px-4 py-2 rounded-lg hover:bg-pink-50">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับข้อที่แล้ว
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden p-6 md:p-12">
+            <div class="text-center mb-8 fade-in">
+                <span class="inline-block bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-semibold tracking-wide mb-4">วิเคราะห์ผลลัพธ์</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">คุณคือคนรักสไตล์...</h2>
+                <div id="result-title" class="text-2xl md:text-3xl font-bold text-rose-500 mt-4 mb-2"></div>
+            </div>
+
+            <div class="bg-rose-50 rounded-2xl p-6 md:p-8 shadow-inner text-gray-700 leading-relaxed mb-8 fade-in" style="animation-delay: 0.2s;">
+                <p id="result-desc" class="mb-4 font-medium"></p>
+                <div class="grid md:grid-cols-2 gap-4 mt-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-rose-100">
+                        <h4 class="text-rose-600 font-semibold mb-2"><i class="fa-solid fa-star text-yellow-400 mr-1"></i> จุดแข็ง</h4>
+                        <p id="result-strength" class="text-sm"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-rose-100">
+                        <h4 class="text-rose-600 font-semibold mb-2"><i class="fa-solid fa-triangle-exclamation text-orange-400 mr-1"></i> ข้อควรระวัง</h4>
+                        <p id="result-warning" class="text-sm"></p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-rose-100 mt-4">
+                    <h4 class="text-rose-600 font-semibold mb-2"><i class="fa-solid fa-key text-blue-400 mr-1"></i> วิธีเข้าหา/วิธีเอาใจ</h4>
+                    <p id="result-tips" class="text-sm"></p>
+                </div>
+            </div>
+
+            <!-- Compatibility Notice -->
+            <div class="bg-gray-50 border border-gray-200 p-6 rounded-2xl text-center fade-in" style="animation-delay: 0.4s;">
+                <h4 class="font-semibold text-gray-800 mb-2"><i class="fa-solid fa-people-arrows text-pink-500 mr-2"></i> คำแนะนำสำหรับการสลับกันทายใจคู่รัก (Compatibility)</h4>
+                <p class="text-sm text-gray-600 mb-3">หากคุณเล่นแบบสลับกันทายใจ (เดาว่าอีกฝ่ายจะตอบอะไร) ให้นำจำนวนข้อที่ <strong>"ตอบตรงกัน"</strong> มาเช็คระดับความเข้ากันได้:</p>
+                <ul class="text-sm text-gray-600 text-left max-w-md mx-auto space-y-2">
+                    <li><strong class="text-pink-500">31-40 ข้อ (Soulmate):</strong> มองตาก็รู้ใจ เข้ากันได้สุดๆ</li>
+                    <li><strong class="text-pink-500">20-30 ข้อ (Growing Together):</strong> เข้าใจกันดี แต่ยังมีความต่างให้เรียนรู้ หมั่นคุยกันเยอะๆ</li>
+                    <li><strong class="text-pink-500">0-19 ข้อ (Work in Progress):</strong> ต้องรีบปรับจูนด่วน! ลองเปิดใจคุยเหตุผลของแต่ละคนดูนะ</li>
+                </ul>
+            </div>
+
+            <!-- Answer Summary Toggle -->
+            <div class="mt-6 fade-in" style="animation-delay: 0.5s;">
+                <button onclick="toggleSummary()" class="w-full bg-white border-2 border-pink-200 text-pink-600 font-bold py-3 px-6 rounded-2xl shadow-sm hover:bg-pink-50 transition-colors flex justify-between items-center">
+                    <span><i class="fa-solid fa-list-check mr-2"></i> ดูภาพรวมคำตอบทั้งหมด (เพื่อตรวจเช็คว่าตรงกันเท่าไหร่)</span>
+                    <i id="summary-icon" class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div id="answer-summary-container" class="hidden mt-4 bg-white rounded-2xl shadow-inner border border-gray-100 p-5 max-h-80 overflow-y-auto text-left space-y-4 text-sm">
+                    <!-- JavaScript will populate this -->
+                </div>
+            </div>
+
+            <div class="text-center mt-8 fade-in" style="animation-delay: 0.6s;">
+                <button onclick="location.reload()" class="bg-gray-800 text-white font-medium py-2 px-6 rounded-full hover:bg-gray-700 transition-colors">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> ทำแบบทดสอบอีกครั้ง
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data Structure for Questions
+        // A = Pragmatic, B = Romantic, C = Supportive
+        const questions = [
+            { q: "1. วันหยุดยาวนี้ คุณอยากทำกิจกรรมใดมากที่สุด?", options: [{t:"เคลียร์งาน/จัดบ้านให้เรียบร้อย จะได้สบายใจ", v:"A"}, {t:"จัดทริปสุดสวีท หรือดินเนอร์หรูสองต่อสอง", v:"B"}, {t:"ทำกิจกรรมอดิเรกด้วยกัน เช่น ดูซีรีส์ เล่นเกม", v:"C"}] },
+            { q: "2. เมื่อมีเรื่องไม่เข้าใจกันจนเริ่มมีปากเสียง คุณมักจะ...", options: [{t:"พูดด้วยเหตุผล เอาความจริงมาคุยกันตรงๆ", v:"A"}, {t:"เงียบ ร้องไห้ หรือใช้อารมณ์เพราะรู้สึกเสียใจ", v:"B"}, {t:"ถอยคนละก้าว รอให้อารมณ์เย็นแล้วค่อยคุย", v:"C"}] },
+            { q: "3. แฟนลืมวันครบรอบของคุณ คุณจะทำอย่างไร?", options: [{t:"ไม่เป็นไร แค่วันๆ นึง ไม่ค่อยซีเรียส", v:"A"}, {t:"น้อยใจมาก หวังว่าเขาจะหาทางง้อแบบจัดเต็ม", v:"B"}, {t:"เตือนเขาตรงๆ และชวนไปหาอะไรอร่อยๆ กินด้วยกัน", v:"C"}] },
+            { q: "4. คุณให้ความสำคัญกับเรื่องใดในการสร้างครอบครัว?", options: [{t:"ความมั่นคงทางการเงินและหน้าที่การงาน", v:"A"}, {t:"ความรัก ความโรแมนติกที่ไม่มีวันจืดจาง", v:"B"}, {t:"ความเข้าใจ การเป็นพาร์ทเนอร์ที่ปรึกษากันได้", v:"C"}] },
+            { q: "5. เวลาแฟนบ่นเรื่องงานให้ฟัง คุณมักจะตอบสนองแบบไหน?", options: [{t:"ช่วยวิเคราะห์ปัญหาและเสนอวิธีแก้ไขทันที", v:"A"}, {t:"กอด ลูบหัว ให้กำลังใจว่า 'ไม่เป็นไรนะ'", v:"B"}, {t:"รับฟังเงียบๆ เป็นเพื่อนระบาย พยักหน้าเห็นด้วย", v:"C"}] },
+            { q: "6. ของขวัญแบบไหนที่คุณอยากได้จากแฟนมากที่สุด?", options: [{t:"ของที่มีประโยชน์ ใช้งานได้จริงในชีวิตประจำวัน", v:"A"}, {t:"ของขวัญแฮนด์เมด หรือของเซอร์ไพรส์ที่มีความหมาย", v:"B"}, {t:"ทริปสั้นๆ หรือประสบการณ์ที่ได้ใช้เวลาทำร่วมกัน", v:"C"}] },
+            { q: "7. คุณมีวิธีการจัดการเรื่องเงินในความสัมพันธ์อย่างไร?", options: [{t:"แยกกระเป๋าชัดเจน หรือทำบัญชีรายรับรายจ่ายร่วมกันเป๊ะๆ", v:"A"}, {t:"ไม่ค่อยคิดมาก ใครมีก็จ่าย สลับๆ กันไปตามอารมณ์", v:"B"}, {t:"ตกลงกองกลางร่วมกันแบบสบายๆ ปรับเปลี่ยนได้ตามสถานการณ์", v:"C"}] },
+            { q: "8. ถ้าแฟนต้องย้ายไปทำงานต่างจังหวัดหรือต่างประเทศ 1 ปี คุณจะรู้สึก...", options: [{t:"สนับสนุนเต็มที่ เป็นโอกาสที่ดีของเขา", v:"A"}, {t:"เศร้ามาก กลัวความห่างไกลจะทำให้รักจืดจาง", v:"B"}, {t:"พยายามหาทางปรับตัว วางแผนเวลาโทรหากันและไปเยี่ยม", v:"C"}] },
+            { q: "9. กิจวัตรก่อนนอนของคุณกับแฟนคืออะไร?", options: [{t:"ต่างคนต่างเล่นมือถือ หรือรีบนอนพักผ่อนเตรียมลุยงานพรุ่งนี้", v:"A"}, {t:"บอกรัก จุ๊บฝันดี และนอนกอดกันแน่นๆ", v:"B"}, {t:"นอนคุยกัน อัปเดตเรื่องราวที่เจอมาในแต่ละวัน", v:"C"}] },
+            { q: "10. คุณคิดว่า 'ความหึงหวง' ในความสัมพันธ์คืออะไร?", options: [{t:"เรื่องไร้สาระ ควรเชื่อใจกัน ถ้านอกใจก็แค่เลิก", v:"A"}, {t:"การแสดงออกว่ารักมาก หวงแปลว่ายังแคร์", v:"B"}, {t:"อาการที่เกิดขึ้นได้ แต่ควรคุยกันให้เคลียร์เพื่อความสบายใจ", v:"C"}] },
+            
+            { q: "11. เวลาไปเดท ใครเป็นคนเลือกร้านอาหาร?", options: [{t:"คนที่หาข้อมูลหรือรีวิวมาดีที่สุด", v:"A"}, {t:"ผลัดกันเซอร์ไพรส์เลือกร้านบรรยากาศดีๆ ให้กัน", v:"B"}, {t:"ช่วยกันเลือก ถามว่าวันนี้อยากกินแนวไหน", v:"C"}] },
+            { q: "12. ในวันวาเลนไทน์ คุณคาดหวังอะไร?", options: [{t:"ไม่ต้องมีอะไรพิเศษ ประหยัดเงินไว้ใช้จ่ายอย่างอื่นดีกว่า", v:"A"}, {t:"ดอกไม้ช่อโต ของขวัญ และดินเนอร์ใต้แสงเทียน", v:"B"}, {t:"แค่ได้อยู่ด้วยกัน ใช้เวลาคุณภาพร่วมกันก็พอ", v:"C"}] },
+            { q: "13. แฟนคุณทำอาหารให้กิน แต่รสชาติแย่มาก คุณจะบอกเขาว่า...", options: [{t:"บอกตรงๆ ว่ารสชาติแปลกๆ คราวหน้าลองสูตรใหม่นะ", v:"A"}, {t:"ฝืนกินจนหมด และบอกว่าอร่อยเพราะเห็นความตั้งใจ", v:"B"}, {t:"บอกว่าน่ารักจังที่ทำให้กิน แต่ช่วยกันปรุงเพิ่มอีกนิดดีมั้ย", v:"C"}] },
+            { q: "14. คุณยอมรับเรื่อง 'การเช็คโทรศัพท์' แฟนได้แค่ไหน?", options: [{t:"ไม่ยอมเด็ดขาด พื้นที่ส่วนตัวต้องชัดเจน", v:"A"}, {t:"เช็คได้ตลอดเวลา ไม่มีความลับต่อกัน", v:"B"}, {t:"เช็คได้ถ้ายินยอม แต่ปกติจะไม่ก้าวก่ายกันเว้นแต่มีเหตุ", v:"C"}] },
+            { q: "15. ถ้าบังเอิญเจอแฟนเก่าของเขาเข้ามาทักทาย คุณจะ...", options: [{t:"ทำตัวปกติ สุภาพ และไม่เก็บมาคิดจุกจิก", v:"A"}, {t:"รู้สึกหงุดหงิด จับมือแฟนแน่นๆ เพื่อแสดงความเป็นเจ้าของ", v:"B"}, {t:"สังเกตสถานการณ์และให้สเปซเขาคุยทักทายพอประมาณ", v:"C"}] },
+            { q: "16. เมื่อต้องตัดสินใจเรื่องใหญ่ในชีวิตคู่ (เช่น ซื้อบ้าน) คุณใช้เกณฑ์ใด?", options: [{t:"ความคุ้มค่า ทำเล ดอกเบี้ย และอนาคต", v:"A"}, {t:"ความรู้สึกแรกที่เห็น และความชอบส่วนตัวเป็นหลัก", v:"B"}, {t:"นั่งลิสต์ข้อดีข้อเสียด้วยกันและโหวตเลือก", v:"C"}] },
+            { q: "17. คุณแสดงความขอโทษหลังทะเลาะกันอย่างไร?", options: [{t:"อธิบายเหตุผลว่าทำไมถึงทำแบบนั้นและเสนอวิธีแก้", v:"A"}, {t:"ร้องไห้ ขอร้อง อ้อนวอน และบอกรัก", v:"B"}, {t:"พูดคำว่า 'ขอโทษ' อย่างจริงใจ และถามว่าเขาโอเคขึ้นไหม", v:"C"}] },
+            { q: "18. นิยาม 'ความสุข' ของคุณกับแฟนคือ...", options: [{t:"การสร้างฐานะและมีชีวิตที่มั่นคงร่วมกัน", v:"A"}, {t:"การได้บอกรักกันทุกวันและไม่เคยเบื่อกัน", v:"B"}, {t:"การเป็นเหมือนเพื่อนสนิทที่ล้อเล่นกันได้ทุกเรื่อง", v:"C"}] },
+            { q: "19. หากคุณป่วยหนักเข้าโรงพยาบาล สิ่งแรกที่คุณหวังจากเขาคือ?", options: [{t:"จัดการเรื่องค่าใช้จ่าย ประกัน และธุระส่วนตัวให้", v:"A"}, {t:"มานั่งเฝ้าข้างเตียงตลอดเวลาและจับมือไว้", v:"B"}, {t:"คอยถามไถ่อาการ ซื้อของกินที่ชอบมาเยี่ยมตามเวลาพัก", v:"C"}] },
+            { q: "20. ข้อเสียใดของเขาที่คุณพอจะรับได้?", options: [{t:"บ้างาน ไม่มีเวลา แต่รับผิดชอบชีวิตดี", v:"A"}, {t:"ขี้งอน ขี้หึง แต่อ้อนเก่งและรักเราคนเดียว", v:"B"}, {t:"ลืมง่าย ชิลเกินไป แต่ยอมรับฟังและพร้อมปรับตัว", v:"C"}] },
+
+            { q: "21. สำหรับคุณ คำสัญญาสำคัญแค่ไหน?", options: [{t:"ต้องทำได้จริง ถ้าทำไม่ได้อย่าพูด", v:"A"}, {t:"แค่ได้ยินก็ชื่นใจแล้ว แม้อาจจะทำไม่ได้ทั้งหมดก็ตาม", v:"B"}, {t:"เป็นเจตนาที่ดี ถ้าพลาดก็มาคุยกันว่าติดปัญหาตรงไหน", v:"C"}] },
+            { q: "22. ถ้ารู้ว่าพ่อแม่ของอีกฝ่ายไม่ค่อยปลื้ม คุณจะทำอย่างไร?", options: [{t:"พิสูจน์ตัวเองด้วยความสำเร็จและการงาน", v:"A"}, {t:"น้อยใจ หรือชวนแฟนหนีไปสร้างครอบครัวเอง", v:"B"}, {t:"พยายามเข้าหาด้วยความอ่อนน้อมและให้แฟนช่วยเป็นกาวใจ", v:"C"}] },
+            { q: "23. งานแต่งงานในฝันของคุณเป็นแบบไหน?", options: [{t:"จัดเล็กๆ ประหยัดงบ เอาเงินไปตั้งตัวดีกว่า", v:"A"}, {t:"จัดใหญ่ สวยงาม โรแมนติกดั่งเทพนิยาย", v:"B"}, {t:"งานอบอุ่น มีแต่เพื่อนสนิทและครอบครัว สนุกสนานเป็นกันเอง", v:"C"}] },
+            { q: "24. สิ่งที่ทำให้คุณหมดแพชชั่นในความสัมพันธ์คืออะไร?", options: [{t:"การไม่วางแผนอนาคต ใช้ชีวิตไปวันๆ", v:"A"}, {t:"ความเย็นชา ไม่ใส่ใจ ไม่บอกรัก", v:"B"}, {t:"การไม่รับฟังความคิดเห็น ไม่ให้เกียรติกัน", v:"C"}] },
+            { q: "25. คุณมีวิธีจัดการกับ 'ความเครียด' ร่วมกับแฟนอย่างไร?", options: [{t:"ต่างคนต่างอยู่ จัดการตัวเองให้เสร็จค่อยมาคุย", v:"A"}, {t:"กอดกันแน่นๆ ร้องไห้ระบายออกมา", v:"B"}, {t:"ชวนกันไปหาอะไรอร่อยๆ กิน หรือหากิจกรรมผ่อนคลายทำ", v:"C"}] },
+            { q: "26. ถ้าแฟนคุณอยากลาออกจากงานประจำมาทำธุรกิจที่เสี่ยงสูง คุณจะ...", options: [{t:"ขอดูแผนธุรกิจ ตัวเลข และเงินสำรองก่อนตัดสินใจ", v:"A"}, {t:"สนับสนุนด้วยใจ ขอแค่เขามีความสุขก็พอ", v:"B"}, {t:"ให้คำปรึกษา ช่วยกันคิดว่าแผนสำรองถ้าพลาดคืออะไร", v:"C"}] },
+            { q: "27. กิจกรรมบนเตียง (Sex) สำคัญกับความสัมพันธ์ระดับไหน?", options: [{t:"เป็นเรื่องธรรมชาติ แต่ไม่ใช่ทั้งหมดของชีวิตคู่", v:"A"}, {t:"สำคัญมาก เป็นการแสดงความรักที่ลึกซึ้งที่สุด", v:"B"}, {t:"สำคัญในแง่การเชื่อมความผูกพัน ต้องจูนให้ตรงกัน", v:"C"}] },
+            { q: "28. เวลาที่คุณรู้สึกท้อแท้ คุณอยากได้ยินคำพูดใดจากแฟน?", options: [{t:"'ปัญหามันคือตรงนี้ เรามาแก้กันนะ'", v:"A"}, {t:"'ฉันรักเธอนะ ฉันจะอยู่ตรงนี้เสมอ'", v:"B"}, {t:"'เธอเก่งมากแล้ว พักก่อนนะ ค่อยสู้ใหม่'", v:"C"}] },
+            { q: "29. แฟนคุณติดเพื่อนมาก คุณจัดการอย่างไร?", options: [{t:"แบ่งเวลาชัดเจน วันไหนของเพื่อน วันไหนของเรา", v:"A"}, {t:"แอบน้อยใจ หวังว่าเขาจะให้ความสำคัญกับเราเป็นที่หนึ่ง", v:"B"}, {t:"ไปแจมกับกลุ่มเพื่อนเขาบ้าง หรือหาเวลาไปกับเพื่อนตัวเองบ้าง", v:"C"}] },
+            { q: "30. สิ่งใดที่คุณยอมไม่ได้เด็ดขาดในความสัมพันธ์?", options: [{t:"การทำลายอนาคตร่วมกัน เช่น สร้างหนี้ก้อนโตโดยไม่บอก", v:"A"}, {t:"การหมดรัก เย็นชา หรือนอกใจ", v:"B"}, {t:"การโกหก ปิดบัง และทำลายความเชื่อใจ", v:"C"}] },
+
+            { q: "31. วิธีเติมความหวานของคุณคือ?", options: [{t:"ซื้อของที่เขาบ่นว่าอยากได้มานานให้", v:"A"}, {t:"บอกรัก สกินชิพ เซอร์ไพรส์บ่อยๆ", v:"B"}, {t:"ทำอาหารให้กิน หรือนวดให้เวลาเขาเหนื่อย", v:"C"}] },
+            { q: "32. ความลับส่วนตัว จำเป็นต้องบอกแฟนทุกเรื่องไหม?", options: [{t:"ไม่จำเป็น เรื่องบางเรื่องเก็บไว้เองดีกว่าเพื่อความสงบสุข", v:"A"}, {t:"ต้องบอกทุกเรื่อง เพราะเราคือคนคนเดียวกัน", v:"B"}, {t:"บอกเฉพาะเรื่องที่อาจส่งผลกระทบต่อความสัมพันธ์", v:"C"}] },
+            { q: "33. คุณอยากให้แฟนปฏิบัติตัวอย่างไรเมื่ออยู่ต่อหน้าคนอื่น?", options: [{t:"วางตัวดี สุภาพ ให้เกียรติกัน ไม่แสดงออกมากเกินไป", v:"A"}, {t:"จับมือ โอบไหล่ แสดงให้ทุกคนรู้ว่ารักเรามาก", v:"B"}, {t:"เป็นธรรมชาติ ล้อเล่นกันได้เหมือนเพื่อน", v:"C"}] },
+            { q: "34. ถ้ารู้ว่าตัวเองเป็นฝ่ายผิดในตอนที่ทะเลาะกัน คุณจะ...", options: [{t:"วิเคราะห์ความผิดตัวเองและรับปากว่าจะไม่ทำอีก", v:"A"}, {t:"เข้าไปสวมกอด อ้อน และบอกขอโทษซ้ำๆ", v:"B"}, {t:"ยอมรับผิดตรงๆ และชวนไปทำกิจกรรมง้อ", v:"C"}] },
+            { q: "35. คุณจัดการความสัมพันธ์กับครอบครัวของแฟนอย่างไร?", options: [{t:"ทำหน้าที่ลูกสะใภ้/ลูกเขยที่ดีตามมารยาทสังคม", v:"A"}, {t:"พยายามเอาใจสุดๆ เพื่อให้พวกเขารักและเอ็นดูเรา", v:"B"}, {t:"ค่อยๆ ทำความรู้จัก เป็นตัวของตัวเองแบบให้เกียรติ", v:"C"}] },
+            { q: "36. เป้าหมายสูงสุดในความสัมพันธ์ของคุณคืออะไร?", options: [{t:"การสร้างครอบครัวที่มีฐานะมั่นคงและสบายในบั้นปลาย", v:"A"}, {t:"การได้รักและดูแลกันไปจนแก่เฒ่า ไม่ทิ้งกัน", v:"B"}, {t:"การเป็นคู่หูที่ผ่านเรื่องราวต่างๆ เติบโตไปด้วยกัน", v:"C"}] },
+            { q: "37. เวลาที่ไม่ได้อยู่ด้วยกัน คุณติดต่อกันบ่อยแค่ไหน?", options: [{t:"คุยแค่เรื่องธุระจำเป็น หรืออัปเดตสั้นๆ เช้า-เย็น", v:"A"}, {t:"ทักหาตลอดเวลา วิดีโอคอลทุกครั้งที่ว่าง", v:"B"}, {t:"แชทคุยเรื่อยๆ ไม่กดดัน ทิ้งข้อความไว้ให้มาตอบ", v:"C"}] },
+            { q: "38. คุณรับมือกับ 'ข้อบกพร่อง' เล็กๆ น้อยๆ ของแฟนอย่างไร?", options: [{t:"พยายามหาเหตุผลมาปรับแก้ หรือเตือนให้เขาเปลี่ยน", v:"A"}, {t:"มองข้ามไปเพราะความรักบังตา เขาทำอะไรก็น่ารัก", v:"B"}, {t:"ยอมรับว่าเป็นส่วนหนึ่งของเขา และล้อเล่นอำกันขำๆ", v:"C"}] },
+            { q: "39. ถ้าให้เลือกของแทนใจ 1 ชิ้น คุณจะให้อะไร?", options: [{t:"สมุดบัญชี/กุญแจบ้านที่สร้างด้วยกัน", v:"A"}, {t:"แหวนคู่ หรือ สร้อยคอสลักชื่อ", v:"B"}, {t:"อัลบั้มรูปที่บันทึกความทรงจำการเดินทางของเรา", v:"C"}] },
+            
+            // Special Zombie Question MUST be Q40
+            { 
+              q: "40. (ข้อพิเศษ) สมมุติว่าโลกแตกและแฟนของคุณ 'กลายเป็นซอมบี้' คุณจะทำอย่างไร?", 
+              options: [
+                  {t: "ตัดใจกำจัดทิ้งเพื่อเอาชีวิตรอดและป้องกันคนอื่นถูกทำร้าย", v: "A"}, 
+                  {t: "ยอมให้กัดและกลายเป็นซอมบี้ไปด้วยกัน จะได้ไม่ต้องพรากจากกัน", v: "B"}, 
+                  {t: "จับขังล่ามโซ่ไว้ก่อน แล้วพยายามหาทางรักษาไปเรื่อยๆ เผื่อมีความหวัง", v: "C"}
+              ] 
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(40).fill(null); // Track user answers
+        let isAnimating = false;
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestion();
+            createFloatingHearts();
+        }
+
+        function renderQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResult();
+                return;
+            }
+
+            const qData = questions[currentQuestion];
+            const qContainer = document.getElementById('quiz-screen');
+            const optionsContainer = document.getElementById('options-container');
+            
+            // Update Progress
+            document.getElementById('progress-text').innerText = `${currentQuestion + 1} / ${questions.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+            // Handle Back Button Visibility
+            const backBtn = document.getElementById('back-btn');
+            if (currentQuestion > 0) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+
+            // Reset animation
+            qContainer.classList.remove('fade-in');
+            void qContainer.offsetWidth; // trigger reflow
+            qContainer.classList.add('fade-in');
+
+            document.getElementById('question-text').innerText = qData.q;
+            optionsContainer.innerHTML = '';
+
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-pink-100 bg-white hover:bg-pink-50 text-gray-700 font-medium shadow-sm';
+                
+                // Highlight previously selected answer if navigating back
+                if (userAnswers[currentQuestion] && userAnswers[currentQuestion].value === opt.v) {
+                    btn.classList.add('border-pink-500', 'bg-pink-50');
+                }
+
+                btn.innerHTML = `<span class="inline-block w-8 h-8 bg-pink-100 text-pink-600 text-center rounded-full leading-8 mr-3 font-bold">${index + 1}</span> ${opt.t}`;
+                btn.onclick = () => selectOption(opt.v, opt.t);
+                optionsContainer.appendChild(btn);
+            });
+            isAnimating = false;
+        }
+
+        function selectOption(value, text) {
+            if(isAnimating) return;
+            isAnimating = true;
+            
+            // Store answer
+            userAnswers[currentQuestion] = { value, text };
+            
+            currentQuestion++;
+            
+            setTimeout(() => {
+                renderQuestion();
+            }, 300); // short delay for visual feedback
+        }
+
+        function prevQuestion() {
+            if(isAnimating || currentQuestion === 0) return;
+            currentQuestion--;
+            renderQuestion();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const resultTitle = document.getElementById('result-title');
+            const resultDesc = document.getElementById('result-desc');
+            const resultStrength = document.getElementById('result-strength');
+            const resultWarning = document.getElementById('result-warning');
+            const resultTips = document.getElementById('result-tips');
+
+            // Calculate scores from userAnswers
+            let scores = { A: 0, B: 0, C: 0 };
+            userAnswers.forEach(ans => {
+                if(ans) scores[ans.value]++;
+            });
+
+            // Determine highest score
+            let maxType = 'A';
+            let maxScore = scores.A;
+
+            if (scores.B > maxScore) { maxType = 'B'; maxScore = scores.B; }
+            if (scores.C > maxScore) { maxType = 'C'; maxScore = scores.C; }
+
+            if (maxType === 'A') {
+                resultTitle.innerText = '"สายไพรคติ & นักปฏิบัติ" (The Pragmatic Lover)';
+                resultDesc.innerText = 'คุณเป็นคนรักที่ใช้เหตุผลนำอารมณ์ มองโลกตามความเป็นจริง โฟกัสที่ความมั่นคง อนาคต และความอยู่รอด คุณแสดงความรักผ่าน "การกระทำ" และ "การสร้างความมั่นคง" มากกว่าคำพูดหวานหู';
+                resultStrength.innerText = 'พึ่งพาได้เสมอในยามวิกฤต เป็นผู้นำที่ดี มีความรับผิดชอบสูง รักจริงหวังแต่ง';
+                resultWarning.innerText = 'บางครั้งอาจดูแข็งกระด้าง เย็นชา หรือละเลยความรู้สึกละเอียดอ่อนของอีกฝ่ายในบางสถานการณ์';
+                resultTips.innerText = 'ชื่นชมในความพยายามและความสำเร็จของเขา แสดงความรักด้วยการสนับสนุนเป้าหมายของเขา ไม่ต้องอ้อมค้อม ต้องการอะไรให้พูดตรงๆ ด้วยเหตุผล';
+            } 
+            else if (maxType === 'B') {
+                resultTitle.innerText = '"สายโรแมนติก & ใช้อารมณ์ความรู้สึก" (The Romantic Lover)';
+                resultDesc.innerText = 'คุณคือคนรักที่ใช้หัวใจนำทาง บูชาความรัก ให้ความสำคัญกับความรู้สึก ความผูกพัน และอารมณ์มาเป็นอันดับหนึ่ง คุณใส่ใจรายละเอียดเล็กๆ น้อยๆ และต้องการการแสดงออกทางความรักที่ชัดเจน';
+                resultStrength.innerText = 'โรแมนติก อบอุ่น ใส่ใจเก่ง ทำให้คู่รักรู้สึกเป็นคนพิเศษและเป็นที่รักอยู่เสมอ';
+                resultWarning.innerText = 'อารมณ์อ่อนไหวง่าย อาจน้อยใจเก่ง หรือเอาความสุขของตัวเองไปผูกติดกับคู่รักมากเกินไปจนสูญเสียความเป็นตัวเอง';
+                resultTips.innerText = 'บอกรักบ่อยๆ สกินชิพ (กอด/หอม) เซอร์ไพรส์ด้วยของขวัญ และที่สำคัญคือต้อง "รับฟัง" และเข้าใจอารมณ์ของเขาโดยไม่ต้องหาเหตุผลมาโต้แย้งเสมอไป';
+            } 
+            else {
+                resultTitle.innerText = '"สายซัพพอร์ต & เพื่อนคู่คิด" (The Supporter / Best Friend Lover)';
+                resultDesc.innerText = 'คุณมองความสัมพันธ์เป็นเหมือน "ทีมเวิร์ค" รักแบบเพื่อนที่รู้ใจ พร้อมลุยและแก้ปัญหาไปด้วยกัน คุณมีความเห็นอกเห็นใจสูง ยืดหยุ่น ประนีประนอม และให้สเปซกับอีกฝ่าย';
+                resultStrength.innerText = 'อยู่ด้วยแล้วสบายใจ ไม่อึดอัด คุยได้ทุกเรื่อง เป็นที่ปรึกษาและผู้ฟังที่ยอดเยี่ยม';
+                resultWarning.innerText = 'ความสัมพันธ์อาจดูราบเรียบเกินไปจนเหมือนเพื่อนสนิทมากกว่าคนรัก ขาดความหวือหวาหรือแพชชั่น';
+                resultTips.innerText = 'ปฏิบัติต่อกันอย่างเท่าเทียม ให้เกียรติความคิดเห็น ชวนทำกิจกรรมใหม่ๆ หรือหากิจกรรมอดิเรกทำร่วมกันเพื่อเติมความหวาน หมั่นขอบคุณในความเสียสละของเขา';
+            }
+
+            // Populate Answer Summary
+            const summaryContainer = document.getElementById('answer-summary-container');
+            summaryContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const ans = userAnswers[index];
+                if (ans) {
+                    summaryContainer.innerHTML += `
+                        <div class="border-b border-gray-100 pb-3 last:border-0">
+                            <p class="font-medium text-gray-800">${q.q}</p>
+                            <p class="text-pink-600 mt-1"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 mr-1 text-gray-400"></i> ${ans.text}</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function toggleSummary() {
+            const container = document.getElementById('answer-summary-container');
+            const icon = document.getElementById('summary-icon');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                container.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Decoration: Add floating hearts to background
+        function createFloatingHearts() {
+            const container = document.getElementById('heart-container');
+            const heartSymbols = ['❤️', '💖', '💕', '🌸', '✨'];
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerText = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                
+                container.appendChild(heart);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    heart.remove();
+                }, 10000);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
+```
